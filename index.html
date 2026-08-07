@@ -242,6 +242,11 @@
   .rc-next .lbl { font-size: 11px; text-transform: uppercase; color: #5c6b60; font-weight: 700; }
   .rc-next b { font-family: var(--mono); font-size: 15px; }
 
+  .rc-util { display: flex; justify-content: flex-end; padding: 10px 16px 0; }
+  .rc-util button { background: none; border: 1px solid #d7e1d9; color: #5c6b60; font-size: 11px; padding: 5px 10px; border-radius: 6px; cursor: pointer; font-family: var(--sans); font-weight: 600; }
+  .rc-util button:hover { background: #f7faf6; color: #1f5c36; border-color: #1f5c36; }
+  .rc-total-lbl #rcTotalDate { font-weight: 400; text-transform: none; letter-spacing: 0; color: #8a988e; }
+
   .rc-tabs { display: flex; border-bottom: 1px solid #e7ede8; }
   .rc-tab { flex: 1; padding: 13px 10px; border: none; background: #f7faf6; color: #5c6b60; font-weight: 700; font-size: 12.5px; cursor: pointer; font-family: var(--sans); border-bottom: 3px solid transparent; }
   .rc-tab:hover { background: #eef4ee; }
@@ -267,15 +272,40 @@
   .rc-actions { display: flex; gap: 10px; flex-wrap: wrap; padding: 18px 24px 6px; }
   .rc-foot { text-align: center; font-size: 10.5px; color: #8a988e; padding: 14px 24px 20px; border-top: 1px solid #f1f4f0; margin-top: 12px; }
 
+  table.rc-table thead { display: table-header-group; }
+  table.rc-table tr { page-break-inside: avoid; }
+
   @media print {
+    @page { size: A4; margin: 10mm 12mm; }
     body.print-client-card .masthead .campaign,
     body.print-client-card .uploader,
     body.print-client-card #clientSwitcher,
     body.print-client-card .rail,
     body.print-client-card #adminWorkArea,
-    body.print-client-card footer.hint { display: none !important; }
+    body.print-client-card footer.hint,
+    body.print-client-card .rc-util { display: none !important; }
     body.print-client-card .app { max-width: 100%; padding: 0; }
-    body.print-client-card .resumo-card { box-shadow: none; border-color: #999; margin: 0 auto; }
+    /* Compacto — tudo em 1 lauda quando o número de parcelas é razoável */
+    body.print-client-card .resumo-card { box-shadow: none; border-color: #999; margin: 0 auto; max-width: none; width: 100%; }
+    body.print-client-card .rc-head { padding: 12px 16px; }
+    body.print-client-card .rc-head img { height: 32px; margin-bottom: 5px; }
+    body.print-client-card .rc-title { font-size: 15px; }
+    body.print-client-card .rc-sub { font-size: 11px; }
+    body.print-client-card .rc-body { padding: 12px 16px 4px; }
+    body.print-client-card .rc-total-lbl { font-size: 10px; }
+    body.print-client-card .rc-total-val { font-size: 26px; margin: 2px 0 10px; }
+    body.print-client-card .rc-breakdown-row { padding: 8px 0; margin-bottom: 10px; gap: 8px 14px; }
+    body.print-client-card .rc-bd { font-size: 11.5px; }
+    body.print-client-card .rc-next { padding: 8px 12px; margin-bottom: 10px; }
+    body.print-client-card .rc-next .lbl { font-size: 10px; }
+    body.print-client-card .rc-next b { font-size: 13px; }
+    body.print-client-card .rc-detail-title { font-size: 12.5px; margin: 2px 0 6px; }
+    body.print-client-card table.rc-table th { font-size: 9px; padding: 5px 6px; }
+    body.print-client-card table.rc-table td { font-size: 10.5px; padding: 4px 6px; }
+    body.print-client-card .rc-recap { font-size: 12px; margin: 0 0 12px; }
+    body.print-client-card .rc-reneg-box { padding: 12px; margin-bottom: 12px; }
+    body.print-client-card .rc-reneg-box label { font-size: 11.5px; }
+    body.print-client-card .rc-foot { padding: 8px 16px 10px; font-size: 9px; margin-top: 8px; }
   }
 </style>
 
@@ -463,6 +493,10 @@
           <div class="rc-sub" id="rcSub"></div>
         </div>
 
+        <div class="rc-util no-print">
+          <button type="button" id="btnExcel">📊 Baixar Excel</button>
+        </div>
+
         <div class="rc-tabs no-print">
           <button type="button" class="rc-tab active" id="tabDebito">1️⃣ Resumo do Débito</button>
           <button type="button" class="rc-tab" id="tabSimulacao">2️⃣ Simulação de Regularização</button>
@@ -470,7 +504,7 @@
 
         <div class="rc-panel" id="panelDebito">
           <div class="rc-body">
-            <div class="rc-total-lbl">Total em aberto hoje</div>
+            <div class="rc-total-lbl">Total em aberto <span id="rcTotalDate">hoje</span></div>
             <div class="rc-total-val" id="rcTotal">R$ 0,00</div>
             <div class="rc-breakdown-row">
               <div class="rc-bd"><span>Principal</span><b id="rcPrincipal">R$ 0,00</b></div>
@@ -1021,6 +1055,7 @@
     $("rcLogo").src = logoImg ? logoImg.src : "";
     $("rcSub").textContent = client.nome + " — Unidade " + (client.unidade || "—") + " · Gleba " + (client.gleba || "—");
     $("rcTotal").textContent = fmtBRL(sums.total);
+    $("rcTotalDate").textContent = "hoje (" + fmtDateBR($("dataCalculo").value) + ")";
     $("rcPrincipal").textContent = fmtBRL(sums.principal);
     $("rcMulta").textContent = fmtBRL(sums.multa);
     $("rcJuros").textContent = fmtBRL(sums.juros);
@@ -1138,6 +1173,63 @@
     return lines.join("\n");
   }
 
+  // ---------- Excel (.csv, abre direto no Excel) ----------
+  function csvField(v) {
+    v = String(v == null ? "" : v);
+    if (/[;"\n]/.test(v)) v = '"' + v.replace(/"/g, '""') + '"';
+    return v;
+  }
+  function csvNum(n) { return (n || 0).toFixed(2).replace(".", ","); }
+
+  function buildExcelCSV(client, sums) {
+    var out = [];
+    function push() { out.push(Array.prototype.slice.call(arguments).map(csvField).join(";")); }
+
+    push("Chacreamento Haras Rio São José Ltda");
+    push("CNPJ", "37.404.884/0001-50");
+    push("Cliente", client.nome);
+    push("CPF", client.buyers.map(function (b) { return b.cpf; }).join(" / "));
+    push("Unidade", client.unidade || "—", "Gleba", client.gleba || "—");
+    push("Data do resumo", fmtDateBR($("dataCalculo").value));
+    push("");
+    push("RESUMO");
+    push("Total em aberto", csvNum(sums.total));
+    push("Valor principal", csvNum(sums.principal));
+    push("Multa (2%)", csvNum(sums.multa));
+    push("Juros (1% a.m.)", csvNum(sums.juros));
+    if (sums.honor) push("Honorários", csvNum(sums.honor));
+    push("Próxima parcela", client.proximaParcela
+      ? (csvNum(client.proximaParcela.valorOriginal) + " em " + fmtDateBR(client.proximaParcela.vencimentoISO))
+      : "—");
+    push("");
+    push("DETALHAMENTO DAS PARCELAS EM ATRASO");
+    push("Parcela", "Vencimento", "Valor Original", "Dias em Atraso", "Multa", "Juros", "Total Atualizado");
+    rows.forEach(function (row) {
+      var c = calcRow(row);
+      push(row.parcela || "—", fmtDateBR(row.vencimento), csvNum(row.valor), c.dias, csvNum(c.multa), csvNum(c.juros), csvNum(c.total));
+    });
+    push("TOTAL", "", csvNum(sums.principal), "", csvNum(sums.multa), csvNum(sums.juros), csvNum(sums.total));
+    if (lastRenego && lastRenego.entrada > 0) {
+      push("");
+      push("SIMULAÇÃO DE REGULARIZAÇÃO");
+      push("Entrada", csvNum(lastRenego.entrada));
+      push("Saldo restante", csvNum(lastRenego.saldoFinal));
+      push("Quantidade de parcelas", lastRenego.qtdeAdd || "—");
+      push("Valor de cada parcela", csvNum(lastRenego.valorParcelaAdd));
+      if (lastRenego.data1aAdd) push("Vencimento da 1ª parcela", fmtDateBR(lastRenego.data1aAdd));
+    }
+    return String.fromCharCode(65279) + out.join("\r\n");
+  }
+
+  function downloadTextFile(text, filename, mime) {
+    var blob = new Blob([text], { type: mime + ";charset=utf-8;" });
+    var url = URL.createObjectURL(blob);
+    var a = document.createElement("a");
+    a.href = url; a.download = filename;
+    document.body.appendChild(a); a.click(); document.body.removeChild(a);
+    setTimeout(function () { URL.revokeObjectURL(url); }, 1000);
+  }
+
   // ---------- events ----------
   var dz = $("dropzone");
   dz.addEventListener("click", function () { $("fileInput").click(); });
@@ -1223,6 +1315,12 @@
   $("btnSimWhatsApp").addEventListener("click", function () {
     if (!activeClientMeta) { alert('Selecione um cliente (suba o PDF do Sienge) antes de gerar o resumo.'); return; }
     copyToClipboard(buildWhatsAppTextSimulacao(activeClientMeta, lastSums), "simCopyFeedback", "Copiado ✓ — cole direto no WhatsApp");
+  });
+  $("btnExcel").addEventListener("click", function () {
+    if (!activeClientMeta) { alert('Selecione um cliente (suba o PDF do Sienge) antes de baixar o Excel.'); return; }
+    var csv = buildExcelCSV(activeClientMeta, lastSums);
+    var safeName = (activeClientMeta.nome || "cliente").replace(/[^a-zA-Z0-9]+/g, "_").slice(0, 40);
+    downloadTextFile(csv, "Resumo_Debito_" + safeName + "_" + (activeClientMeta.unidade || "") + ".csv", "text/csv");
   });
   $("btnCopy").addEventListener("click", function () {
     var text = buildCopyText();

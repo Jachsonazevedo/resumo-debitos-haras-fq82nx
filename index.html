@@ -417,24 +417,6 @@
 
     <main>
       <div id="adminWorkArea">
-      <div class="hero" id="heroCard" hidden>
-        <div class="id-block">
-          <div class="hero-name"></div>
-          <div class="hero-cpf"></div>
-          <div class="hero-badges"></div>
-        </div>
-        <div class="amount-block">
-          <div class="lbl">Débito atualizado hoje</div>
-          <div class="hero-amt"></div>
-          <div class="hero-breakdown"></div>
-        </div>
-        <div class="side-block">
-          <span class="status-pill hero-status"></span>
-          <div class="line">Próxima parcela regular: <b class="hero-proxima"></b></div>
-          <div class="line">Pago até hoje: <b class="hero-pago"></b></div>
-        </div>
-      </div>
-
       <div class="ledger-head">
         <h2>Extrato de parcelas em atraso</h2>
         <span class="meta" id="rowCountMeta">0 parcelas</span>
@@ -496,7 +478,7 @@
       </div>
       </div>
 
-      <h2 class="section-title">Resumo para o Cliente <span class="tag">simples + detalhado — pronto p/ PDF ou WhatsApp</span></h2>
+      <h2 class="section-title">Relatórios para o Cliente <span class="tag">informativos — não são termo de renegociação</span></h2>
       <section class="resumo-card" id="clientResumoCard" hidden>
         <div class="rc-head">
           <img id="rcLogo" src="" alt="Haras Rio São José" />
@@ -509,13 +491,14 @@
         </div>
 
         <div class="rc-tabs no-print">
-          <button type="button" class="rc-tab active" id="tabDebito">1️⃣ Resumo do Débito</button>
-          <button type="button" class="rc-tab" id="tabSimulacao">2️⃣ Regularização</button>
-          <button type="button" class="rc-tab" id="tabRescisao">3️⃣ Rescisão</button>
+          <button type="button" class="rc-tab active" id="tabDebito">📄 Relatório 1 — Resumo do Débito</button>
+          <button type="button" class="rc-tab" id="tabSimulacao">🤝 Simular Regularização</button>
+          <button type="button" class="rc-tab" id="tabRescisao">📄 Relatório 2 — Simular Rescisão</button>
         </div>
 
         <div class="rc-panel" id="panelDebito">
           <div class="rc-body">
+            <div class="rc-detail-title">📄 Relatório 1 — Resumo do Débito</div>
             <div class="rc-total-lbl">Total em aberto <span id="rcTotalDate">hoje</span></div>
             <div class="rc-total-val" id="rcTotal">R$ 0,00</div>
             <div class="rc-breakdown-row">
@@ -526,6 +509,7 @@
             </div>
 
             <div class="rc-next"><span class="lbl">Próxima parcela a vencer</span><b id="rcProxima">—</b></div>
+            <div class="helptext" style="margin-top:-10px; margin-bottom:14px;">Já mostrando aqui porque, se o cliente for negociar, essa parcela também pode entrar na conversa.</div>
 
             <div class="rc-detail-title">Detalhamento das parcelas em atraso</div>
             <div class="rc-table-wrap">
@@ -550,8 +534,9 @@
 
         <div class="rc-panel" id="panelSimulacao" hidden>
           <div class="rc-body">
-            <div class="rc-detail-title">🤝 Simulação de Regularização</div>
-            <div class="rc-recap">Débito atual: <b id="simRecapTotal">R$ 0,00</b></div>
+            <div class="rc-detail-title">🤝 Simular Regularização</div>
+            <div class="helptext" style="margin-top:-4px; margin-bottom:12px;">Use isto depois de mandar o Relatório 1 pro cliente, quando ele topar negociar — não é um relatório pra mandar sozinho.</div>
+            <div class="rc-recap">Débito atual (Relatório 1): <b id="simRecapTotal">R$ 0,00</b></div>
 
             <div class="rc-reneg-box">
               <label for="entrada">💰 Quanto o cliente pode dar de entrada para regularizar a dívida?</label>
@@ -575,7 +560,7 @@
 
         <div class="rc-panel" id="panelRescisao" hidden>
           <div class="rc-body">
-            <div class="rc-detail-title">🔚 Simulação de Rescisão</div>
+            <div class="rc-detail-title">📄 Relatório 2 — Simulação de Rescisão</div>
             <div class="rc-recap">Valor do lote: <b id="rescLote">R$ 0,00</b> · Valor já pago: <b id="rescPago">R$ 0,00</b> <span id="rescQtdePagasWrap">(<span id="rescQtdePagas">0</span> parcelas)</span></div>
 
             <div class="rc-rescisao-box">
@@ -1039,7 +1024,6 @@
     $("statTotal").textContent = fmtBRL(sumTotal);
 
     lastSums = { principal: sumOriginal, multa: sumMulta, juros: sumJuros, honor: sumHonor, total: sumTotal, qtdeOverdue: qtdeOverdue };
-    renderHero(activeClientMeta, lastSums);
     renderRenegociacao(sumOriginal, sumMulta, sumJuros, sumHonor, qtdeOverdue);
     renderClientResumo(activeClientMeta, lastSums);
   }

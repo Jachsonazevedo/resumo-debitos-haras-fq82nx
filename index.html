@@ -261,6 +261,14 @@
   .rc-reneg-result .rrow { display: flex; justify-content: space-between; font-size: 13.5px; padding: 3px 0; color: #6b4a10; }
   .rc-reneg-result .rrow b { font-family: var(--mono); color: #1a231d; }
 
+  .rc-rescisao-box { background: #eef2f7; border-radius: 12px; padding: 16px; margin-bottom: 14px; }
+  .rc-rescisao-box .rrow { display: flex; justify-content: space-between; gap: 10px; font-size: 13px; padding: 4px 0; color: #4a5a6b; }
+  .rc-rescisao-box .rrow b { font-family: var(--mono); color: #1a231d; font-variant-numeric: tabular-nums; }
+  .rc-rescisao-box .rrow-total { border-top: 1px solid #d6dfe8; margin-top: 6px; padding-top: 10px; font-weight: 700; color: #1a231d; }
+  .rc-rescisao-box .rrow-total b { font-size: 18px; color: #2c4a6e; }
+  .rc-rescisao-box label { display: block; font-size: 12.5px; font-weight: 700; color: #2c4a6e; margin-bottom: 7px; text-transform: none; letter-spacing: 0; }
+  .rc-rescisao-box input#qtdeParcelasRescisao { padding: 9px 11px; font-size: 15px; border: 1px solid #c3d2e2; border-radius: 8px; font-family: var(--mono); background: #fff; color: #1a231d; }
+
   .rc-detail-title { font-family: var(--serif); font-size: 14.5px; font-weight: 700; margin: 4px 0 10px; color: #1a231d; }
   .rc-table-wrap { overflow-x: auto; border: 1px solid #e7ede8; border-radius: 10px; margin-bottom: 6px; }
   table.rc-table { border-collapse: collapse; width: 100%; min-width: 480px; }
@@ -305,6 +313,9 @@
     body.print-client-card .rc-recap { font-size: 12px; margin: 0 0 12px; }
     body.print-client-card .rc-reneg-box { padding: 12px; margin-bottom: 12px; }
     body.print-client-card .rc-reneg-box label { font-size: 11.5px; }
+    body.print-client-card .rc-rescisao-box { padding: 12px; margin-bottom: 10px; }
+    body.print-client-card .rc-rescisao-box .rrow { font-size: 11px; }
+    body.print-client-card .rc-rescisao-box .rrow-total b { font-size: 15px; }
     body.print-client-card .rc-foot { padding: 8px 16px 10px; font-size: 9px; margin-top: 8px; }
   }
 </style>
@@ -499,7 +510,8 @@
 
         <div class="rc-tabs no-print">
           <button type="button" class="rc-tab active" id="tabDebito">1️⃣ Resumo do Débito</button>
-          <button type="button" class="rc-tab" id="tabSimulacao">2️⃣ Simulação de Regularização</button>
+          <button type="button" class="rc-tab" id="tabSimulacao">2️⃣ Regularização</button>
+          <button type="button" class="rc-tab" id="tabRescisao">3️⃣ Rescisão</button>
         </div>
 
         <div class="rc-panel" id="panelDebito">
@@ -558,6 +570,35 @@
             <button class="btn btn-primary" id="btnSimPDF">🖨️ Gerar PDF</button>
             <button class="btn" id="btnSimWhatsApp">📋 Copiar Texto (WhatsApp)</button>
             <span class="helptext" id="simCopyFeedback" style="margin-top:0;"></span>
+          </div>
+        </div>
+
+        <div class="rc-panel" id="panelRescisao" hidden>
+          <div class="rc-body">
+            <div class="rc-detail-title">🔚 Simulação de Rescisão</div>
+            <div class="rc-recap">Valor do lote: <b id="rescLote">R$ 0,00</b> · Valor já pago: <b id="rescPago">R$ 0,00</b> <span id="rescQtdePagasWrap">(<span id="rescQtdePagas">0</span> parcelas)</span></div>
+
+            <div class="rc-rescisao-box">
+              <div class="rrow"><span>Valor já pago</span><b id="rescValorPago">R$ 0,00</b></div>
+              <div class="rrow"><span>(−) Comissão (7% do valor do lote — Cláusula 18ª)</span><b id="rescComissao">R$ 0,00</b></div>
+              <div class="rrow"><span>(−) Pena convencional (20% do valor pago — Cláusulas 22ª/24ª)</span><b id="rescPena">R$ 0,00</b></div>
+              <div class="rrow rrow-total"><span>Valor a devolver</span><b id="rescADevolver">R$ 0,00</b></div>
+
+              <label for="qtdeParcelasRescisao" style="margin-top:14px;">Devolução parcelada em quantas vezes?</label>
+              <input type="text" id="qtdeParcelasRescisao" inputmode="numeric" value="6" style="max-width:120px;" />
+              <div class="rc-reneg-result" id="rescParcelaResult" style="margin-top:10px;">
+                <div class="rrow"><span>Valor de cada parcela</span><b id="rescValorParcela">R$ 0,00</b></div>
+              </div>
+            </div>
+
+            <div class="helptext" id="rescZeroNote" hidden>Os descontos (comissão + pena) superam o valor pago — não há saldo a devolver neste caso (avaliar cobrança de diferença separadamente).</div>
+            <div class="helptext">Se o cliente já tomou posse do lote (cerca, plantação, construção), avaliar separadamente a aplicação da Cláusula 25ª (fruição, 0,5%/mês) — não incluída neste cálculo automático. Cálculo conforme fórmula validada contra os precedentes reais (Lucilene, Sonia, Emanuel).</div>
+          </div>
+
+          <div class="rc-actions no-print">
+            <button class="btn btn-primary" id="btnRescPDF">🖨️ Gerar PDF</button>
+            <button class="btn" id="btnRescWhatsApp">📋 Copiar Texto (WhatsApp)</button>
+            <span class="helptext" id="rescCopyFeedback" style="margin-top:0;"></span>
           </div>
         </div>
 
@@ -643,6 +684,7 @@
   var activeClientMeta = null;
   var lastRenego = null;
   var lastSums = null;
+  var lastRescisao = null;
 
   $("dataCalculo").value = todayISO();
 
@@ -774,6 +816,7 @@
     out.qtdePagas = pagas.length;
     var datasBaixa = pagas.map(function (r) { return r.dataBaixaISO; }).filter(Boolean).sort();
     out.ultimaPagaISO = datasBaixa.length ? datasBaixa[datasBaixa.length - 1] : null;
+    out.valorLote = out.rows.reduce(function (s, r) { return s + r.valorOriginal; }, 0);
 
     out.id = (out.documento || out.titulo || fileName) + "";
     out.nome = out.buyers.map(function (b) { return b.nome; }).join(" & ") || fileName.replace(/\.pdf$/i, "");
@@ -1107,6 +1150,30 @@
     tbody.appendChild(trTotal);
 
     $("rcGeradoEm").textContent = fmtDateBR(todayISO());
+    renderRescisao(client);
+  }
+
+  function renderRescisao(client) {
+    var valorLote = client.valorLote || 0;
+    var valorPago = client.totalPago || 0;
+    var comissao = valorLote * 0.07;
+    var pena = valorPago * 0.20;
+    var aDevolverBruto = valorPago - comissao - pena;
+    var aDevolver = Math.max(aDevolverBruto, 0);
+    var qtde = Math.max(parseInt($("qtdeParcelasRescisao").value, 10) || 1, 1);
+    var valorParcela = aDevolver / qtde;
+
+    $("rescLote").textContent = fmtBRL(valorLote);
+    $("rescPago").textContent = fmtBRL(valorPago);
+    $("rescQtdePagas").textContent = client.qtdePagas || 0;
+    $("rescValorPago").textContent = fmtBRL(valorPago);
+    $("rescComissao").textContent = "− " + fmtBRL(comissao);
+    $("rescPena").textContent = "− " + fmtBRL(pena);
+    $("rescADevolver").textContent = fmtBRL(aDevolver);
+    $("rescValorParcela").textContent = fmtBRL(valorParcela);
+    $("rescZeroNote").hidden = aDevolverBruto >= 0;
+
+    lastRescisao = { valorLote: valorLote, valorPago: valorPago, comissao: comissao, pena: pena, aDevolver: aDevolver, qtde: qtde, valorParcela: valorParcela };
   }
 
   function buildCopyText() {
@@ -1173,6 +1240,28 @@
     return lines.join("\n");
   }
 
+  function buildWhatsAppTextRescisao(client) {
+    var r = lastRescisao || {};
+    var lines = [];
+    lines.push("🐴 *Chacreamento Haras Rio São José*");
+    lines.push("Simulação de Rescisão — " + client.nome);
+    lines.push("Unidade " + (client.unidade || "—") + " · Gleba " + (client.gleba || "—"));
+    lines.push("");
+    lines.push("Valor do lote: " + fmtBRL(r.valorLote));
+    lines.push("Valor já pago: " + fmtBRL(r.valorPago) + " (" + (client.qtdePagas || 0) + " parcelas)");
+    lines.push("");
+    lines.push("🔚 *Cálculo da rescisão*");
+    lines.push("Valor já pago: " + fmtBRL(r.valorPago));
+    lines.push("(−) Comissão (7% do lote): " + fmtBRL(r.comissao));
+    lines.push("(−) Pena convencional (20% do pago): " + fmtBRL(r.pena));
+    lines.push("*Valor a devolver: " + fmtBRL(r.aDevolver) + "*");
+    lines.push("Em " + (r.qtde || "—") + "x de " + fmtBRL(r.valorParcela));
+    lines.push("");
+    lines.push("_Se o cliente já tomou posse do lote, a Cláusula 25ª (fruição) pode se aplicar — avaliado à parte._");
+    lines.push("_Gerado em " + fmtDateBR(todayISO()) + "_");
+    return lines.join("\n");
+  }
+
   // ---------- Excel (.csv, abre direto no Excel) ----------
   function csvField(v) {
     v = String(v == null ? "" : v);
@@ -1217,6 +1306,17 @@
       push("Quantidade de parcelas", lastRenego.qtdeAdd || "—");
       push("Valor de cada parcela", csvNum(lastRenego.valorParcelaAdd));
       if (lastRenego.data1aAdd) push("Vencimento da 1ª parcela", fmtDateBR(lastRenego.data1aAdd));
+    }
+    if (lastRescisao) {
+      push("");
+      push("SIMULAÇÃO DE RESCISÃO");
+      push("Valor do lote", csvNum(lastRescisao.valorLote));
+      push("Valor já pago", csvNum(lastRescisao.valorPago));
+      push("Comissão (7% do lote)", csvNum(lastRescisao.comissao));
+      push("Pena convencional (20% do pago)", csvNum(lastRescisao.pena));
+      push("Valor a devolver", csvNum(lastRescisao.aDevolver));
+      push("Quantidade de parcelas", lastRescisao.qtde);
+      push("Valor de cada parcela", csvNum(lastRescisao.valorParcela));
     }
     return String.fromCharCode(65279) + out.join("\r\n");
   }
@@ -1272,6 +1372,7 @@
     $("cContrato").value = ""; $("cParcelaRegular").value = "";
     $("entrada").value = "0"; $("qtdeBoletos").value = ""; $("qtdeParcelasAdd").value = "1";
     $("data1aAdd").value = ""; $("dataProxRegular").value = "";
+    $("qtdeParcelasRescisao").value = "6";
     $("dataCalculo").value = todayISO();
     setUploadStatus("");
     $("clientResumoCard").hidden = true;
@@ -1283,14 +1384,16 @@
   $("btnPrint").addEventListener("click", function () { window.print(); });
 
   function showResumoTab(which) {
-    var isDebito = which === "debito";
-    $("panelDebito").hidden = !isDebito;
-    $("panelSimulacao").hidden = isDebito;
-    $("tabDebito").classList.toggle("active", isDebito);
-    $("tabSimulacao").classList.toggle("active", !isDebito);
+    $("panelDebito").hidden = which !== "debito";
+    $("panelSimulacao").hidden = which !== "simulacao";
+    $("panelRescisao").hidden = which !== "rescisao";
+    $("tabDebito").classList.toggle("active", which === "debito");
+    $("tabSimulacao").classList.toggle("active", which === "simulacao");
+    $("tabRescisao").classList.toggle("active", which === "rescisao");
   }
   $("tabDebito").addEventListener("click", function () { showResumoTab("debito"); });
   $("tabSimulacao").addEventListener("click", function () { showResumoTab("simulacao"); });
+  $("tabRescisao").addEventListener("click", function () { showResumoTab("rescisao"); });
 
   function printResumo() {
     if (!activeClientMeta) { alert('Selecione um cliente (suba o PDF do Sienge) antes de gerar o resumo.'); return; }
@@ -1306,6 +1409,7 @@
 
   $("btnDebitoPDF").addEventListener("click", printResumo);
   $("btnSimPDF").addEventListener("click", printResumo);
+  $("btnRescPDF").addEventListener("click", printResumo);
   window.addEventListener("afterprint", function () { document.body.classList.remove("print-client-card"); });
 
   $("btnDebitoWhatsApp").addEventListener("click", function () {
@@ -1315,6 +1419,10 @@
   $("btnSimWhatsApp").addEventListener("click", function () {
     if (!activeClientMeta) { alert('Selecione um cliente (suba o PDF do Sienge) antes de gerar o resumo.'); return; }
     copyToClipboard(buildWhatsAppTextSimulacao(activeClientMeta, lastSums), "simCopyFeedback", "Copiado ✓ — cole direto no WhatsApp");
+  });
+  $("btnRescWhatsApp").addEventListener("click", function () {
+    if (!activeClientMeta) { alert('Selecione um cliente (suba o PDF do Sienge) antes de gerar o resumo.'); return; }
+    copyToClipboard(buildWhatsAppTextRescisao(activeClientMeta), "rescCopyFeedback", "Copiado ✓ — cole direto no WhatsApp");
   });
   $("btnExcel").addEventListener("click", function () {
     if (!activeClientMeta) { alert('Selecione um cliente (suba o PDF do Sienge) antes de baixar o Excel.'); return; }
@@ -1330,7 +1438,7 @@
     }).catch(function () { fb.textContent = "Não foi possível copiar automaticamente — selecione o texto manualmente."; });
   });
 
-  ["dataCalculo", "honorMode", "descontoPct", "entrada", "qtdeBoletos", "qtdeParcelasAdd", "data1aAdd", "dataProxRegular"].forEach(function (id) {
+  ["dataCalculo", "honorMode", "descontoPct", "entrada", "qtdeBoletos", "qtdeParcelasAdd", "data1aAdd", "dataProxRegular", "qtdeParcelasRescisao"].forEach(function (id) {
     $(id).addEventListener("input", function () { render(); renderClientGrid(); });
     $(id).addEventListener("change", function () { render(); renderClientGrid(); });
   });
